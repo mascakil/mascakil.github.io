@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>To-Do Tugas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      box-sizing: border-box;
+      border: 1px solid #333;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #eee;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .task {
+      background-color: #f2f2f2;
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    .task small {
+      color: #555;
+    }
+
+    .task div {
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>To-Do Tugas</h2>
+
+  <input type="text" id="namaTugas" placeholder="Nama tugas...">
+  <input type="text" id="matkul" placeholder="Matkul...">
+  <input type="date" id="deadline">
+  <select id="semester">
+    <option value="Semester 1">Semester 1</option>
+    <option value="Semester 2">Semester 2</option>
+    <option value="Semester 3">Semester 3</option>
+    <option value="Semester 4">Semester 4</option>
+  </select>
+  <button onclick="tambahTugas()">Tambah Tugas</button>
+
+  <div id="tugasList"></div>
+
+  <script>
+    function tambahTugas() {
+      const namaTugas = document.getElementById("namaTugas").value.trim();
+      const matkul = document.getElementById("matkul").value.trim();
+      const deadline = document.getElementById("deadline").value;
+      const semester = document.getElementById("semester").value;
+
+      if (!namaTugas || !matkul || !deadline) {
+        alert("Harap lengkapi semua kolom.");
+        return;
+      }
+
+      const tugasDiv = document.createElement("div");
+      tugasDiv.classList.add("task");
+
+      tugasDiv.innerHTML = `
+        <strong>${semester}</strong><br>
+        <strong>Matkul:</strong> <strong>${matkul}</strong><br>
+        <strong>${namaTugas}</strong><br>
+        <small>Deadline: ${deadline}</small>
+        <div>
+          <label>
+            <input type="checkbox" class="hapusCheckbox"> Tandai selesai
+          </label>
+        </div>
+      `;
+
+      // Event: hapus tugas kalau checkbox dicentang
+      const checkbox = tugasDiv.querySelector(".hapusCheckbox");
+      checkbox.addEventListener("change", function () {
+        if (checkbox.checked) {
+          tugasDiv.remove();
+        }
+      });
+
+      // Tambahkan ke daftar
+      document.getElementById("tugasList").appendChild(tugasDiv);
+
+      // Kosongkan input
+      document.getElementById("namaTugas").value = "";
+      document.getElementById("matkul").value = "";
+      document.getElementById("deadline").value = "";
+      document.getElementById("semester").selectedIndex = 0;
+    }
+  </script>
+
+</body>
+</html>
