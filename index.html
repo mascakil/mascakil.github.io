@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>To-Do Tugas</title>
   <style>
     body {
@@ -11,11 +11,9 @@
       margin: auto;
       padding: 20px;
     }
-
     h2 {
       text-align: center;
     }
-
     input, select, button {
       width: 100%;
       padding: 10px;
@@ -24,24 +22,20 @@
       border: 1px solid #333;
       border-radius: 5px;
     }
-
     button {
       background-color: #eee;
       cursor: pointer;
       font-weight: bold;
     }
-
     .task {
       background-color: #f2f2f2;
       margin-top: 15px;
       padding: 10px;
       border-radius: 6px;
     }
-
     .task small {
       color: #555;
     }
-
     .task div {
       margin-top: 8px;
     }
@@ -51,9 +45,10 @@
 
   <h2>To-Do Tugas</h2>
 
-  <input type="text" id="namaTugas" placeholder="Nama tugas...">
-  <input type="text" id="matkul" placeholder="Matkul...">
-  <input type="date" id="deadline">
+  <input type="text" id="namaTugas" placeholder="Nama tugas..." />
+  <input type="text" id="matkul" placeholder="Matkul..." />
+  <input type="text" id="tempat" placeholder="Tempat pengumpulan..." />
+  <input type="date" id="deadline" />
   <select id="semester">
     <option value="Semester 1">Semester 1</option>
     <option value="Semester 2">Semester 2</option>
@@ -64,80 +59,89 @@
 
   <div id="tugasList"></div>
 
- <script>
-  // Ambil dan tampilkan tugas dari localStorage saat halaman dibuka
-  window.onload = function () {
-    const tugasData = JSON.parse(localStorage.getItem("tugas")) || [];
-    tugasData.forEach(tugas => renderTugas(tugas));
-  };
+  <script>
+    let tugasArray = [];
 
-  function tambahTugas() {
-    const namaTugas = document.getElementById("namaTugas").value.trim();
-    const matkul = document.getElementById("matkul").value.trim();
-    const deadline = document.getElementById("deadline").value;
-    const semester = document.getElementById("semester").value;
+    // Ambil data dari localStorage saat halaman dibuka
+    window.onload = function () {
+      const simpanan = localStorage.getItem("tugasList");
+      if (simpanan) {
+        tugasArray = JSON.parse(simpanan);
+        tugasArray.forEach(t => renderTugas(t));
+      }
+    };
 
-    if (!namaTugas || !matkul || !deadline) {
-      alert("Harap lengkapi semua kolom.");
-      return;
+    function tambahTugas() {
+      const namaTugas = document.getElementById("namaTugas").value.trim();
+      const matkul = document.getElementById("matkul").value.trim();
+      const tempat = document.getElementById("tempat").value.trim();
+      const deadline = document.getElementById("deadline").value;
+      const semester = document.getElementById("semester").value;
+
+      if (!namaTugas || !matkul || !tempat || !deadline) {
+        alert("Harap lengkapi semua kolom.");
+        return;
+      }
+
+      const tugas = {
+        id: Date.now(), // ID unik
+        namaTugas,
+        matkul,
+        tempat,
+        deadline,
+        semester
+      };
+
+      tugasArray.push(tugas);
+      simpanKeStorage();
+      renderTugas(tugas);
+
+      // Reset input
+      document.getElementById("namaTugas").value = "";
+      document.getElementById("matkul").value = "";
+      document.getElementById("tempat").value = "";
+      document.getElementById("deadline").value = "";
+      document.getElementById("semester").selectedIndex = 0;
     }
 
-    const tugas = { namaTugas, matkul, deadline, semester };
-    renderTugas(tugas);
-    simpanTugas(tugas);
+    function renderTugas(tugas) {
+      const tugasDiv = document.createElement("div");
+      tugasDiv.classList.add("task");
+      tugasDiv.setAttribute("data-id", tugas.id);
 
-    // Kosongkan input
-    document.getElementById("namaTugas").value = "";
-    document.getElementById("matkul").value = "";
-    document.getElementById("deadline").value = "";
-    document.getElementById("semester").selectedIndex = 0;
-  }
+      tugasDiv.innerHTML = `
+        <strong>${tugas.semester}</strong><br>
+        <strong>Matkul:</strong> <strong>${tugas.matkul}</strong><br>
+        <strong>${tugas.namaTugas}</strong><br>
+        <small>Tempat: ${tugas.tempat}</small><br>
+        <small>Deadline: ${tugas.deadline}</small>
+        <div>
+          <label>
+            <input type="checkbox" class="hapusCheckbox"> Tandai selesai
+          </label>
+        </div>
+      `;
 
-  function renderTugas(tugas) {
-    const tugasDiv = document.createElement("div");
-    tugasDiv.classList.add("task");
+      const checkbox = tugasDiv.querySelector(".hapusCheckbox");
+      checkbox.addEventListener("change", function () {
+        if (checkbox.checked) {
+          hapusTugas(tugas.id);
+          tugasDiv.remove();
+        }
+      });
 
-    tugasDiv.innerHTML = `
-      <strong>${tugas.semester}</strong><br>
-      <strong>Matkul:</strong> <strong>${tugas.matkul}</strong><br>
-      <strong>${tugas.namaTugas}</strong><br>
-      <small>Deadline: ${tugas.deadline}</small>
-      <div>
-        <label>
-          <input type="checkbox" class="hapusCheckbox"> Tandai selesai
-        </label>
-      </div>
-    `;
+      document.getElementById("tugasList").appendChild(tugasDiv);
+    }
 
-    // Event: hapus tugas kalau checkbox dicentang
-    const checkbox = tugasDiv.querySelector(".hapusCheckbox");
-    checkbox.addEventListener("change", function () {
-      if (checkbox.checked) {
-        tugasDiv.remove();
-        hapusTugas(tugas);
-      }
-    });
+    function simpanKeStorage() {
+      localStorage.setItem("tugasList", JSON.stringify(tugasArray));
+    }
 
-    document.getElementById("tugasList").appendChild(tugasDiv);
-  }
-
-  function simpanTugas(tugasBaru) {
-    const tugasLama = JSON.parse(localStorage.getItem("tugas")) || [];
-    tugasLama.push(tugasBaru);
-    localStorage.setItem("tugas", JSON.stringify(tugasLama));
-  }
-
-  function hapusTugas(tugasHapus) {
-    let tugasLama = JSON.parse(localStorage.getItem("tugas")) || [];
-    tugasLama = tugasLama.filter(t => 
-      !(t.namaTugas === tugasHapus.namaTugas && 
-        t.matkul === tugasHapus.matkul &&
-        t.deadline === tugasHapus.deadline &&
-        t.semester === tugasHapus.semester)
-    );
-    localStorage.setItem("tugas", JSON.stringify(tugasLama));
-  }
-</script>
+    function hapusTugas(id) {
+      tugasArray = tugasArray.filter(t => t.id !== id);
+      simpanKeStorage();
+    }
+  </script>
 
 </body>
 </html>
