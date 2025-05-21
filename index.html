@@ -64,51 +64,80 @@
 
   <div id="tugasList"></div>
 
-  <script>
-    function tambahTugas() {
-      const namaTugas = document.getElementById("namaTugas").value.trim();
-      const matkul = document.getElementById("matkul").value.trim();
-      const deadline = document.getElementById("deadline").value;
-      const semester = document.getElementById("semester").value;
+ <script>
+  // Ambil dan tampilkan tugas dari localStorage saat halaman dibuka
+  window.onload = function () {
+    const tugasData = JSON.parse(localStorage.getItem("tugas")) || [];
+    tugasData.forEach(tugas => renderTugas(tugas));
+  };
 
-      if (!namaTugas || !matkul || !deadline) {
-        alert("Harap lengkapi semua kolom.");
-        return;
-      }
+  function tambahTugas() {
+    const namaTugas = document.getElementById("namaTugas").value.trim();
+    const matkul = document.getElementById("matkul").value.trim();
+    const deadline = document.getElementById("deadline").value;
+    const semester = document.getElementById("semester").value;
 
-      const tugasDiv = document.createElement("div");
-      tugasDiv.classList.add("task");
-
-      tugasDiv.innerHTML = `
-        <strong>${semester}</strong><br>
-        <strong>Matkul:</strong> <strong>${matkul}</strong><br>
-        <strong>${namaTugas}</strong><br>
-        <small>Deadline: ${deadline}</small>
-        <div>
-          <label>
-            <input type="checkbox" class="hapusCheckbox"> Tandai selesai
-          </label>
-        </div>
-      `;
-
-      // Event: hapus tugas kalau checkbox dicentang
-      const checkbox = tugasDiv.querySelector(".hapusCheckbox");
-      checkbox.addEventListener("change", function () {
-        if (checkbox.checked) {
-          tugasDiv.remove();
-        }
-      });
-
-      // Tambahkan ke daftar
-      document.getElementById("tugasList").appendChild(tugasDiv);
-
-      // Kosongkan input
-      document.getElementById("namaTugas").value = "";
-      document.getElementById("matkul").value = "";
-      document.getElementById("deadline").value = "";
-      document.getElementById("semester").selectedIndex = 0;
+    if (!namaTugas || !matkul || !deadline) {
+      alert("Harap lengkapi semua kolom.");
+      return;
     }
-  </script>
+
+    const tugas = { namaTugas, matkul, deadline, semester };
+    renderTugas(tugas);
+    simpanTugas(tugas);
+
+    // Kosongkan input
+    document.getElementById("namaTugas").value = "";
+    document.getElementById("matkul").value = "";
+    document.getElementById("deadline").value = "";
+    document.getElementById("semester").selectedIndex = 0;
+  }
+
+  function renderTugas(tugas) {
+    const tugasDiv = document.createElement("div");
+    tugasDiv.classList.add("task");
+
+    tugasDiv.innerHTML = `
+      <strong>${tugas.semester}</strong><br>
+      <strong>Matkul:</strong> <strong>${tugas.matkul}</strong><br>
+      <strong>${tugas.namaTugas}</strong><br>
+      <small>Deadline: ${tugas.deadline}</small>
+      <div>
+        <label>
+          <input type="checkbox" class="hapusCheckbox"> Tandai selesai
+        </label>
+      </div>
+    `;
+
+    // Event: hapus tugas kalau checkbox dicentang
+    const checkbox = tugasDiv.querySelector(".hapusCheckbox");
+    checkbox.addEventListener("change", function () {
+      if (checkbox.checked) {
+        tugasDiv.remove();
+        hapusTugas(tugas);
+      }
+    });
+
+    document.getElementById("tugasList").appendChild(tugasDiv);
+  }
+
+  function simpanTugas(tugasBaru) {
+    const tugasLama = JSON.parse(localStorage.getItem("tugas")) || [];
+    tugasLama.push(tugasBaru);
+    localStorage.setItem("tugas", JSON.stringify(tugasLama));
+  }
+
+  function hapusTugas(tugasHapus) {
+    let tugasLama = JSON.parse(localStorage.getItem("tugas")) || [];
+    tugasLama = tugasLama.filter(t => 
+      !(t.namaTugas === tugasHapus.namaTugas && 
+        t.matkul === tugasHapus.matkul &&
+        t.deadline === tugasHapus.deadline &&
+        t.semester === tugasHapus.semester)
+    );
+    localStorage.setItem("tugas", JSON.stringify(tugasLama));
+  }
+</script>
 
 </body>
 </html>
