@@ -10,6 +10,7 @@
       max-width: 600px;
       margin: auto;
       padding: 20px;
+      background-color: #fafafa;
     }
     h2 {
       text-align: center;
@@ -26,6 +27,10 @@
       background-color: #eee;
       cursor: pointer;
       font-weight: bold;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #ddd;
     }
     .task {
       background-color: #f2f2f2;
@@ -38,6 +43,25 @@
     }
     .task div {
       margin-top: 8px;
+    }
+    #notifButton {
+      background-color: #25d366;
+      color: white;
+    }
+    /* Notifikasi visual */
+    #notif {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #4caf50;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      display: none;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 999;
     }
   </style>
 </head>
@@ -56,13 +80,14 @@
     <option value="Semester 4">Semester 4</option>
   </select>
   <button onclick="tambahTugas()">Tambah Tugas</button>
+  <button id="notifButton" onclick="kirimPesanNotif()">Kirim Notifikasi Tugas Terbaru</button>
 
   <div id="tugasList"></div>
+  <div id="notif"></div>
 
   <script>
     let tugasArray = [];
 
-    // Ambil data dari localStorage saat halaman dibuka
     window.onload = function () {
       const simpanan = localStorage.getItem("tugasList");
       if (simpanan) {
@@ -84,7 +109,7 @@
       }
 
       const tugas = {
-        id: Date.now(), // ID unik
+        id: Date.now(),
         namaTugas,
         matkul,
         tempat,
@@ -96,7 +121,6 @@
       simpanKeStorage();
       renderTugas(tugas);
 
-      // Reset input
       document.getElementById("namaTugas").value = "";
       document.getElementById("matkul").value = "";
       document.getElementById("tempat").value = "";
@@ -125,21 +149,70 @@
       const checkbox = tugasDiv.querySelector(".hapusCheckbox");
       checkbox.addEventListener("change", function () {
         if (checkbox.checked) {
-          hapusTugas(tugas.id);
+          hapusTugas(tugas.id, tugas);
           tugasDiv.remove();
         }
       });
 
-      document.getElementById("tugasList").appendChild(tugasDiv);
+      document.getElementById("tugasList").prepend(tugasDiv);
     }
 
     function simpanKeStorage() {
       localStorage.setItem("tugasList", JSON.stringify(tugasArray));
     }
 
-    function hapusTugas(id) {
+    function hapusTugas(id, tugasObj) {
       tugasArray = tugasArray.filter(t => t.id !== id);
       simpanKeStorage();
+
+      if (tugasObj) {
+        tampilkanNotif(`Tugas "${tugasObj.matkul}" telah selesai!`);
+        kirimPesanWA(tugasObj);
+      }
+    }
+
+    function tampilkanNotif(pesan) {
+      const notif = document.getElementById("notif");
+      notif.textContent = pesan;
+      notif.style.display = "block";
+      setTimeout(() => {
+        notif.style.display = "none";
+      }, 3000);
+    }
+
+    // ✅ Kirim pesan WA otomatis saat tugas selesai
+    function kirimPesanWA(tugas) {
+      const nomorTujuan = "6281931850075"; // ganti sesuai nomor kamu
+      let pesan = `*NOTIFIKASI TUGAS TERBARU*%0A%0A`;
+      pesan += `Tugas: ${encodeURIComponent(tugas.namaTugas)}%0A`;
+      pesan += `Matkul: ${encodeURIComponent(tugas.matkul)}%0A`;
+      pesan += `Deadline: ${encodeURIComponent(tugas.deadline)}%0A`;
+      pesan += `Semester: ${encodeURIComponent(tugas.semester)}%0A`;
+      pesan += `Tempat: ${encodeURIComponent(tugas.tempat)}%0A%0A`;
+      pesan += `Tugas ini telah selesai ✅`;
+
+      const urlWa = `https://wa.me/${nomorTujuan}?text=${pesan}`;
+      window.open(urlWa, "_blank");
+    }
+
+    // Tombol manual kirim tugas terbaru
+    function kirimPesanNotif() {
+      const nomorTujuan = "6281931850075";
+      const tugasTerbaru = tugasArray[tugasArray.length - 1];
+
+      let pesan = "Halo%2C%20tidak%20ada%20tugas%20tersimpan.";
+      if (tugasTerbaru) {
+        pesan = `*NOTIFIKASI TUGAS TERBARU*%0A%0A`;
+        pesan += `Tugas: ${encodeURIComponent(tugasTerbaru.namaTugas)}%0A`;
+        pesan += `Matkul: ${encodeURIComponent(tugasTerbaru.matkul)}%0A`;
+        pesan += `Deadline: ${encodeURIComponent(tugasTerbaru.deadline)}%0A`;
+        pesan += `Semester: ${encodeURIComponent(tugasTerbaru.semester)}%0A`;
+        pesan += `Tempat: ${encodeURIComponent(tugasTerbaru.tempat)}%0A%0A`;
+        pesan += `Segera dikerjakan 💪`;
+      }
+
+      const urlWa = `https://wa.me/${nomorTujuan}?text=${pesan}`;
+      window.open(urlWa, "_blank");
     }
   </script>
 
