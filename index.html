@@ -189,7 +189,7 @@
       pesan += `Deadline: ${encodeURIComponent(tugas.deadline)}%0A`;
       pesan += `Semester: ${encodeURIComponent(tugas.semester)}%0A`;
       pesan += `Tempat: ${encodeURIComponent(tugas.tempat)}%0A%0A`;
-      pesan += `Tugas ini telah selesai ✅`;
+      pesan += `Tugas ini telah selesai dan terkirim ✅`;
 
       const urlWa = `https://wa.me/${nomorTujuan}?text=${pesan}`;
       window.open(urlWa, "_blank");
